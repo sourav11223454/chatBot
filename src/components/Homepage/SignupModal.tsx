@@ -112,4 +112,4 @@ const SignupModal: React.FC<SignupModalProps> = ({ onClose }) => {
     </div>
   )
 }
-export default SignupModal;
+export default SignupModal

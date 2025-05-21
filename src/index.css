@@ -1,28 +1,25 @@
-@import "@fontsource/inter";
+/* Import Inter font */
+@import "@fontsource/inter"; /* Local Inter font */
 @import "@fontsource/inter/700.css";
 @import "@fontsource/inter/800.css";
 
 
-@import url("https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap");
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-
+/* Global styles */
 html,
-body{
+body {
   margin: 0;
-  padding: 10;
-  background: #05101c;
-  /* color: white; */
-  font-family: "Roboto Slab", serif;
+  padding: 0;
+  background: #010c17;
+  color: white;
+  font-family: 'Inter', sans-serif; /* Use Inter font */
 }
 
-.image-inverted{
+.image-inverted {
   filter: invert(100%);
 }
-.nav-link{
+
+/* Navigation link styles */
+.nav-link {
   font-weight: 600;
   text-transform: uppercase;
   margin-right: 10px;
@@ -32,6 +29,8 @@ body{
   text-decoration: none;
   letter-spacing: 1px;
 }
+
+/* Custom styles for MUI (Material UI) components */
 .MuiOutlinedInput-input-root.Mui-focused,
 .MuiOutlinedInput-notchedOutline {
   border-color: white !important;

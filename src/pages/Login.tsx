@@ -1,17 +1,22 @@
 import { IoIosLogIn } from "react-icons/io";
-import { Box, Button, Typography } from "@mui/material";
-import React, { useEffect } from "react";
+import { Box, Button } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import CustomizedInput from "../components/shared/CustomizedInput";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../context/AuthContent";
 import { useNavigate } from "react-router-dom";
+import Lottie from "lottie-react";
+import loginAnimation from "../assets/login-animation.json";
+import "./Login.css";
 
 const Login = () => {
   const auth = useAuth();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
-    // If already logged in, redirect to chat
+    setIsAnimating(true);
     if (auth?.isLoggedIn) {
       navigate("/chat");
     }
@@ -19,82 +24,67 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true);
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
     try {
-      toast.loading("Signing In", { id: "login" });
+      toast.loading("Authenticating...", { id: "login" });
       await auth?.login(email, password);
-      toast.success("Signed In Successfully", { id: "login" });
+      toast.success("Access granted", { id: "login" });
     } catch (error) {
-      console.log(error);
-      toast.error("Signing In Failed", { id: "login" });
+      console.error(error);
+      toast.error("Authentication failed", { id: "login" });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Box width={"100%"} height={"100%"} display="flex" flex={1}>
-      <Box padding={8} mt={8} display={{ md: "flex", sm: "none", xs: "none" }}>
-        <img src="airobot.png" alt="Robot" style={{ width: "300px" }} />
-      </Box>
-      <Box
-        display={"flex"}
-        flex={{ xs: 1, md: 0.5 }}
-        justifyContent={"center"}
-        alignItems={"center"}
-        padding={2}
-        ml={"auto"}
-        mt={16}
-      >
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            margin: "auto",
-            padding: "30px",
-            boxShadow: "10px 10px 20px #000",
-            borderRadius: "10px",
-            border: "none",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-            }}
+    <Box className={`login-container ${isAnimating ? "animate-in" : ""}`}>
+      <div className="login-background"></div>
+
+      <div className="login-content">
+        <div className="login-animation">
+          <Lottie animationData={loginAnimation} loop={true} />
+        </div>
+
+        <form onSubmit={handleSubmit} className="login-form">
+          <CustomizedInput
+            type="email"
+            name="email"
+            label="Email"
+            fullWidth
+            className="input-field"
+          />
+          <CustomizedInput
+            type="password"
+            name="password"
+            label="Password"
+            fullWidth
+            className="input-field"
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            className="submit-button"
+            disabled={isLoading}
+            endIcon={<IoIosLogIn />}
           >
-            <Typography
-              variant="h4"
-              textAlign="center"
-              padding={2}
-              fontWeight={600}
-            >
-              Login
-            </Typography>
-            <CustomizedInput type="email" name="email" label="Email" />
-            <CustomizedInput type="password" name="password" label="Password" />
-            <Button
-              type="submit"
-              sx={{
-                px: 2,
-                py: 1,
-                mt: 2,
-                width: "400px",
-                borderRadius: 2,
-                bgcolor: "#00fffc",
-                ":hover": {
-                  bgcolor: "white",
-                  color: "black",
-                },
-              }}
-              endIcon={<IoIosLogIn />}
-            >
-              Login
-            </Button>
-          </Box>
+            {isLoading ? (
+              <span className="button-loading">
+                <span className="loading-dot"></span>
+                <span className="loading-dot"></span>
+                <span className="loading-dot"></span>
+              </span>
+            ) : (
+              "SUBMIT"
+            )}
+          </Button>
         </form>
-      </Box>
+      </div>
     </Box>
   );
 };

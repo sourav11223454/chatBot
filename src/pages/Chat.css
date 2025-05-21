@@ -1,0 +1,546 @@
+/* src/pages/Chat.css */
+
+/* --- Global Styles & Body Resets --- */
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif; /* A modern, readable font */
+    line-height: 1.6;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+/* --- Main Chat Container --- */
+.chat-container {
+    height: 100vh;
+    width: 100vw; /* Use vw for full width */
+    background: linear-gradient(to bottom right, #000428, #004e92); /* Deep blue gradient */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box; /* Include padding/border in element's total width/height */
+}
+
+/* --- Chat Header --- */
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05); /* Semi-transparent white */
+    padding: 16px 32px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.chat-header h1 {
+    font-size: 28px; /* Slightly larger heading */
+    font-weight: bold;
+    margin: 0; /* Remove default margin */
+    color: #8be9fd; /* A vibrant light blue/cyan for contrast */
+    text-shadow: 0 0 5px rgba(139, 233, 253, 0.5); /* Subtle glow */
+}
+
+.chat-header .logout-button { /* Specific selector for logout button in header */
+    background-color: #ff5555; /* Muted red for logout */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.chat-header .logout-button:hover {
+    background-color: #cc4444;
+    transform: translateY(-1px);
+}
+
+/* --- Main Content Area (Sidebar + Chat Window) --- */
+.chat-main {
+    display: flex;
+    flex: 1; /* Occupy remaining space vertically */
+    overflow: hidden; /* Crucial to contain scrolling content */
+    padding: 20px;
+    gap: 20px; /* Space between sidebar and chat window */
+    max-width: 1400px; /* Max content width for desktop */
+    margin: 0 auto; /* Center the content */
+    width: 100%; /* Ensure it takes full width within max-width */
+    box-sizing: border-box;
+}
+
+/* --- Sidebar Styling --- */
+.chat-sidebar {
+    flex-shrink: 0; /* Prevent shrinking */
+    width: 280px; /* Fixed width for sidebar on desktop */
+    background: rgba(0, 0, 0, 0.2); /* Semi-transparent black */
+    padding: 25px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    display: flex; /* Use flex for internal layout */
+    flex-direction: column;
+    color: #cccccc;
+    box-sizing: border-box;
+}
+
+.chat-sidebar .sidebar-avatar { /* Styling for the Avatar component */
+    margin: 0 auto 20px auto; /* Center and add bottom margin */
+    background-color: #8be9fd; /* Accent color for avatar background */
+    color: #1a1a2e; /* Dark text on light background */
+    font-weight: 700;
+    width: 60px; /* Example fixed size */
+    height: 60px;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.chat-sidebar h2 { /* Targeting the "YOU ARE TALKING TO A CHATBOT" heading */
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: #8be9fd; /* Accent color */
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.chat-sidebar p { /* Targeting the description paragraph */
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #b0b0b0;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.chat-sidebar .clear-chat-button { /* Styling for the Clear Chat button */
+    margin-top: auto; /* Push button to the bottom */
+    padding: 12px 25px;
+    background-color: #ffaa00; /* Amber/Orange color */
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.1s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    align-self: center; /* Center horizontally in flex column */
+    width: fit-content;
+}
+
+.chat-sidebar .clear-chat-button:hover {
+    background-color: #e69500;
+    transform: translateY(-1px);
+}
+
+/* --- Chat Window Styling --- */
+.chat-window {
+    flex: 1; /* Occupy remaining horizontal space */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.2); /* Semi-transparent black */
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden; /* Important for containing scrollable messages */
+    box-sizing: border-box;
+}
+
+.chat-window h1 { /* Targeting the "MERN-GPT" title inside chat-window */
+    font-size: 40px;
+    color: white;
+    margin-bottom: 20px;
+    margin-top: 0;
+    text-align: center;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+/* --- Chat Messages Container --- */
+.chat-messages {
+    flex: 1; /* Occupy remaining space above input form */
+    overflow-y: auto; /* Make messages scrollable */
+    padding-right: 8px; /* Space for scrollbar */
+    margin-bottom: 12px;
+    display: flex; /* To allow individual messages to align */
+    flex-direction: column;
+    gap: 12px; /* Space between messages */
+}
+
+/* Custom Scrollbar for Webkit browsers */
+.chat-messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* --- Individual Message Styling --- */
+.message {
+    margin-bottom: 10px;
+    padding: 12px 18px;
+    background: rgba(255, 255, 255, 0.08); /* Light transparent background */
+    border-radius: 18px; /* Rounded corners for bubbles */
+    max-width: 75%; /* Limit width of bubbles */
+    word-wrap: break-word;
+    line-height: 1.5;
+    font-size: 1rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15); /* Subtle shadow */
+    position: relative; /* For the "tail" */
+}
+
+.message.user {
+    align-self: flex-end; /* Right align */
+    background-color: #2196f3; /* A nice blue for user messages */
+    color: white;
+    border-bottom-right-radius: 4px; /* Slightly less rounded on one corner for tail */
+}
+
+.message.user::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: -7px; /* Adjust to touch the bubble */
+    width: 0;
+    height: 0;
+    border: 10px solid transparent;
+    border-left-color: #2196f3; /* Match bubble color */
+    border-bottom-color: #2196f3; /* Match bubble color */
+    border-radius: 0 0 10px 0; /* Creates the tail effect */
+    transform: rotate(45deg);
+    z-index: -1;
+}
+
+.message.assistant { /* Note: user's CSS had .message.bot, I'm using .message.assistant as per JS */
+    align-self: flex-start; /* Left align */
+    background-color: rgba(255, 255, 255, 0.08); /* Keep transparent background for bot */
+    color: #e0e0e0; /* Light text */
+    border-bottom-left-radius: 4px; /* Slightly less rounded on one corner for tail */
+}
+
+.message.assistant::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -7px; /* Adjust to touch the bubble */
+    width: 0;
+    height: 0;
+    border: 10px solid transparent;
+    border-right-color: rgba(255, 255, 255, 0.08); /* Match bubble color */
+    border-bottom-color: rgba(255, 255, 255, 0.08); /* Match bubble color */
+    border-radius: 0 0 0 10px;
+    transform: rotate(-45deg);
+    z-index: -1;
+}
+
+/* Loading animation (dots) */
+.dot-flashing {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #ccc;
+    color: #ccc;
+    animation: dotFlashing 1s infinite linear alternate;
+    animation-delay: 0s;
+    margin: 0 2px;
+    display: inline-block;
+}
+
+.dot-flashing-delay1 {
+    animation-delay: 0.2s;
+}
+
+.dot-flashing-delay2 {
+    animation-delay: 0.4s;
+}
+
+@keyframes dotFlashing {
+    0% { background-color: #ccc; }
+    50%, 100% { background-color: #8be9fd; } /* Match header accent color */
+}
+
+
+/* --- Chat Input Form --- */
+.chat-input-form {
+    display: flex;
+    gap: 12px; /* Space between input and button */
+    padding: 15px 20px; /* Padding inside the input bar */
+    background: rgba(0, 0, 0, 0.2); /* Background for the input bar */
+    border-radius: 10px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.chat-input {
+    flex: 1; /* Take all available space */
+    padding: 14px 20px;
+    border-radius: 25px; /* More rounded input */
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    background-color: rgba(255, 255, 255, 0.1); /* Lighter transparent input background */
+    color: white;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.chat-input::placeholder { /* Placeholder text color */
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.chat-input:focus {
+    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(139, 233, 253, 0.4); /* Glow on focus */
+}
+
+.chat-input:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.chat-send-button {
+    background-color: #8be9fd; /* Vibrant accent for send button */
+    color: #1a1a2e; /* Dark text for contrast */
+    padding: 14px 20px;
+    border: none;
+    border-radius: 25px; /* Rounded button */
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.1s ease, opacity 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: flex; /* To center icon/text */
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-send-button:hover:not(:disabled) {
+    background-color: #61dafb;
+    transform: translateY(-1px);
+}
+
+.chat-send-button:disabled {
+    background-color: rgba(139, 233, 253, 0.4);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.chat-send-button .MuiCircularProgress-root { /* Styling for MUI CircularProgress inside button */
+    color: #1a1a2e !important; /* Ensure the loader color matches button text */
+}
+
+/* --- Error Message Styling --- */
+.chat-error-message {
+    color: #ff5555; /* Red for error messages */
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+
+
+/* --- Responsive Design --- */
+@media (max-width: 900px) {
+    .chat-main {
+        flex-direction: column; /* Stack sidebar and chat window on smaller screens */
+        padding: 15px;
+        gap: 15px;
+    }
+
+    .chat-sidebar {
+        width: 100%; /* Sidebar takes full width */
+        order: 2; /* Move sidebar below chat area on small screens */
+        padding: 20px;
+        border-right: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .chat-window {
+        order: 1; /* Chat window above sidebar */
+        padding: 15px;
+        height: 70vh; /* Give chat window a fixed height on smaller screens */
+    }
+
+    .chat-header {
+        flex-direction: column; /* Stack title and logout button */
+        gap: 10px;
+        padding: 10px 15px;
+    }
+
+    .chat-header h1 {
+        font-size: 24px;
+    }
+
+    .chat-sidebar h2 {
+        font-size: 1.1rem;
+    }
+
+    .chat-sidebar p {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .chat-main {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .chat-sidebar {
+        padding: 15px;
+    }
+
+    .chat-window {
+        padding: 10px;
+        height: calc(100vh - 200px); /* Adjust height based on header/input on mobile */
+    }
+
+    .chat-header {
+        padding: 8px 10px;
+    }
+
+    .chat-header h1 {
+        font-size: 20px;
+    }
+
+    .chat-messages {
+        padding-right: 5px;
+        gap: 8px;
+    }
+
+    .message {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+        max-width: 85%; /* Allow wider bubbles on small screens */
+    }
+
+    .chat-input-form {
+        padding: 10px 15px;
+        gap: 8px;
+    }
+
+    .chat-input {
+        padding: 12px 16px;
+        font-size: 0.95rem;
+    }
+
+    .chat-send-button {
+        padding: 12px 18px;
+        font-size: 0.95rem;
+    }
+}
+
+/* --- Markdown Content Styling within messages --- */
+/* (Added/Adjusted based on your request) */
+
+.message p {
+    margin-bottom: 0.8em; /* Spacing between paragraphs */
+    color: inherit; /* Inherit text color from bubble */
+}
+
+.message p:last-child {
+    margin-bottom: 0; /* No margin on the last paragraph */
+}
+
+.message strong {
+    font-weight: bold;
+    color: #8be9fd; /* Highlight bold text */
+}
+
+.message em {
+    font-style: italic;
+}
+
+.message ul,
+.message ol {
+    margin: 0.8em 0;
+    padding-left: 25px; /* Indent lists */
+    list-style-position: outside; /* Ensure bullets/numbers are outside */
+}
+
+.message li {
+    margin-bottom: 0.4em; /* Spacing between list items */
+}
+
+.message a {
+    color: #8be9fd; /* Link color */
+    text-decoration: underline;
+}
+
+.message h1, .message h2, .message h3, .message h4, .message h5, .message h6 {
+    color: #8be9fd; /* Headings color */
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+
+/* ⭐ UPDATED: Inline code styling for generic rendering */
+.message code {
+    background-color: rgba(255, 255, 255, 0.15); /* Light transparent background for inline code */
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-family: 'Fira Code', 'Roboto Mono', monospace; /* Monospace font */
+    font-size: 0.9em;
+    color: #8be9fd; /* A highlight color for inline code */
+}
+
+/* ⭐ UPDATED: Block code styling for generic rendering (without SyntaxHighlighter) */
+.message pre {
+    background-color: #333; /* Generic dark background for code blocks */
+    color: #eee; /* Light text color for contrast */
+    padding: 1em;
+    border-radius: 8px;
+    overflow-x: auto; /* Enable horizontal scroll for long lines of code */
+    margin: 1em 0;
+    font-family: 'Fira Code', 'Roboto Mono', monospace;
+    font-size: 0.9em;
+    white-space: pre-wrap; /* Ensure wrapping for long lines */
+    word-break: break-all; /* Break long words */
+}
+
+/* Tables (if remark-gfm is used and AI generates tables) */
+.message table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+}
+
+.message th, .message td {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 8px;
+    text-align: left;
+}
+
+.message th {
+    background-color: rgba(255, 255, 255, 0.1);
+    font-weight: bold;
+}
+/* Logout Button Styles */
+.custom-logout-button {
+  background-color: black;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.custom-logout-button:hover {
+  background-color: #1a1a1a;
+  transform: scale(1.05);
+}
+
+.custom-logout-button:active {
+  transform: scale(0.95);
+}

@@ -1,8 +1,6 @@
 import { Avatar, Box, Typography } from '@mui/material';
-import React from 'react'
 import { useAuth } from '../../context/AuthContent';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { coldarkCold } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
 
 const ChatItem = ({
     content,

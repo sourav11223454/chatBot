@@ -3,7 +3,6 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Logo from "./shared/Logo";
 import { useAuth } from "../context/AuthContent";
-import NavigationLink from "./shared/NavigationLink";
 
 // Define the types for the props
 interface HeaderProps {
@@ -12,7 +11,7 @@ interface HeaderProps {
   onSignupClick: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onLogout, onLoginClick, onSignupClick }) => {
+const Header: React.FC<HeaderProps> = ({ onLogout }) => {
   const auth = useAuth();
 
   return (
@@ -37,39 +36,13 @@ const Header: React.FC<HeaderProps> = ({ onLogout, onLoginClick, onSignupClick }
 
         <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
           {auth?.loading ? null : auth?.isLoggedIn ? (
-            <>
-              <NavigationLink
-                bg="#00fffc"
-                to="/chat"
-                text="Go To Chat"
-                textcolor="black"
-              />
-              <NavigationLink
-                bg="#51538f"
-                textcolor="white"
-                to="/"
-                text="Logout"
-                onClick={onLogout}
-              />
-            </>
-          ) : (
-            <>
-              <NavigationLink
-                bg="#00fffc"
-                to="/login"
-                text="Login"
-                textcolor="black"
-                onClick={onLoginClick}
-              />
-              <NavigationLink
-                bg="#51538f"
-                textcolor="white"
-                to="/signup"
-                text="Signup"
-                onClick={onSignupClick}
-              />
-            </>
-          )}
+            <button
+              onClick={onLogout}
+             className="custom-logout-button"
+            >
+              LOGOUT
+            </button>
+          ) : null}
         </div>
       </Toolbar>
     </AppBar>

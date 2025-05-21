@@ -1,10 +1,13 @@
-import { Avatar, Box, Button, IconButton, Typography } from '@mui/material';
-import React, { useRef, useState } from 'react';
-import { useAuth } from '../context/AuthContent';
-import { blue } from '@mui/material/colors';
-import ChatItem from '../components/chat/ChatItem';
-import { IoMdSend } from 'react-icons/io';
-import { sendChatRequest } from '../helpers/api-communicator';
+// src/Chat.tsx
+import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
+import { Avatar, Box, Button, IconButton, Typography, CircularProgress } from "@mui/material";
+import { IoMdSend } from "react-icons/io";
+import { useAuth } from "../context/AuthContent";
+import { sendChatRequest, getUserChats, deleteUserChats } from "../helpers/api-communicator";
+import toast from "react-hot-toast";
+import "../pages/Chat.css";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 type Message = {
   role: "user" | "assistant";
@@ -14,118 +17,161 @@ type Message = {
 const Chat = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const auth = useAuth();
-  const [chatMessages, setChatMessages] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState(false); // 🆕 state
-  const [error, setError] = useState(""); // optional: show rate limit error
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
 
-  const chatId = "1234567890abcdef"; // replace later with real ID
-
-  const handleSubmit = async () => {
-    const userInputMessage = inputRef.current?.value?.trim() || "";
-    if (!userInputMessage || isLoading) return;
-
-    setIsLoading(true);
-    setError(""); // reset any old error
-
-    if (inputRef.current) {
-      inputRef.current.value = "";
+  const scrollToBottom = () => {
+    if (chatMessagesContainerRef.current) {
+      chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
     }
+  };
 
-    const newMessage: Message = { role: "user", content: userInputMessage };
-    setChatMessages((prev) => [...prev, newMessage]);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isLoading]);
+
+  useLayoutEffect(() => {
+    if (auth?.isLoggedIn && auth.user) {
+      toast.loading("Loading Chats", { id: "loadchats" });
+      getUserChats()
+        .then((data) => {
+          setMessages([...data.chats]);
+          toast.success("Successfully Loaded Chats", { id: "loadchats" });
+        })
+        .catch((err) => {
+          console.error(err);
+          toast.error("Loading Failed", { id: "loadchats" });
+          setMessages([{ role: 'assistant', content: "Hello! How can I help you today?" }]);
+        });
+    }
+  }, [auth]);
+
+  const handleSend = async (e: React.FormEvent | React.KeyboardEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    const newMessage: Message = { role: "user", content: input };
+    setMessages((prev) => [...prev, newMessage]);
+    setInput("");
+    setIsLoading(true);
+    setError("");
 
     try {
-      const chatData = await sendChatRequest(chatId, "user", userInputMessage);
-      setChatMessages([...chatData.chats]);
+      const chatData = await sendChatRequest(newMessage.content);
+      setMessages([...chatData.chats]);
     } catch (error: any) {
       console.error("Error sending chat:", error);
+      const errorMessage = error.response?.data?.message || "Something went wrong. Please try again.";
       if (error.response?.status === 429) {
-        setError("Too many requests. Please wait and try again.");
+        setError(errorMessage);
+        toast.error("Too many requests! Please slow down.", { id: "chat_error" });
       } else {
-        setError("Something went wrong. Please try again.");
+        setError(errorMessage);
+        toast.error(errorMessage, { id: "chat_error" });
       }
+      setMessages((prev) => [...prev, { role: "assistant", content: errorMessage }]);
     } finally {
       setIsLoading(false);
+      inputRef.current?.focus();
+    }
+  };
+
+  const handleClear = async () => {
+    try {
+      toast.loading("Deleting chats", { id: "deletechats" });
+      await deleteUserChats();
+      setMessages([{ role: 'assistant', content: "All chats cleared! How can I assist you now?" }]);
+      toast.success("Chats Deleted Successfully", { id: "deletechats" });
+    } catch (error) {
+      console.error(error);
+      toast.error("Deleting chats failed", { id: "deletechats" });
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleSubmit();
+    if (e.key === "Enter" && !e.shiftKey) {
+      handleSend(e);
     }
   };
 
   return (
-    <Box sx={{ display: "flex", flex: 1, width: "100%", height: "100%", mt: 3, gap: 3 }}>
-      {/* Sidebar */}
-      <Box sx={{ display: { md: "flex", xs: "none", sm: "none" }, flex: 0.2, flexDirection: "column" }}>
-        <Box sx={{
-          display: "flex", width: "100%", height: "60vh", bgcolor: "rgb(17,29,39)", borderRadius: 5,
-          flexDirection: 'column', mx: 3,
-        }}>
-          <Avatar sx={{ mx: "auto", my: 2, bgcolor: 'white', color: 'black', fontWeight: 700 }}>
+    <Box className="chat-container">
+      <Box className="chat-main">
+        {/* Sidebar with chatbot info */}
+        <Box className="chat-sidebar">
+          <Avatar className="sidebar-avatar">
             {auth?.user?.name[0]}
-            {auth?.user?.name?.split(" ")[1]?.[0] ?? ''}
+            {auth?.user?.name?.split(" ")[1]?.[0] ?? ""}
           </Avatar>
-          <Typography sx={{ mx: "auto", fontFamily: "work sans" }}>
+          <Typography component="h2" className="sidebar-heading">
             YOU ARE TALKING TO A CHATBOT
           </Typography>
-          <Typography sx={{ mx: "auto", fontFamily: "work sans", my: 4, p: 3 }}>
-            You can ask any questions related to Knowledge, Business, Advice,
-            Education, etc. But avoid personal information!!
+          <Typography className="sidebar-description">
+            You can ask any questions related to Knowledge, Business, Advice, Education, etc. But avoid personal
+            information!!
           </Typography>
-          <Button
-            sx={{
-              width: "200px", my: "auto", color: "white", fontWeight: "700",
-              borderRadius: 3, mx: "auto", bgcolor: blue[300],
-              ":hover": { bgcolor: blue.A400 },
-            }}
-          >
+          <Button onClick={handleClear} className="clear-chat-button">
             Clear Chat
           </Button>
-        </Box>
-      </Box>
-
-      {/* Main Chat Area */}
-      <Box sx={{ display: "flex", flex: { md: 0.8, xs: 1, sm: 1 }, flexDirection: "column", px: 3 }}>
-        <Typography sx={{ fontSize: "40px", color: "white", mb: 2, mx: "auto" }}>
-          MERN-GPT
-        </Typography>
-
-        <Box sx={{
-          width: "100%", height: "60vh", borderRadius: 3, mx: "auto",
-          display: "flex", flexDirection: "column", overflowY: "auto", scrollBehavior: "smooth",
-        }}>
-          {chatMessages.map((chat, index) => (
-            <ChatItem content={chat.content} role={chat.role} key={index} />
-          ))}
+          
         </Box>
 
-        {error && (
-          <Typography color="error" sx={{ mt: 1, mx: "auto" }}>
-            {error}
-          </Typography>
-        )}
+        {/* Chat area */}
+        <Box className="chat-window">
+          <Box ref={chatMessagesContainerRef} className="chat-messages">
+            {messages.map((msg, idx) => (
+              <Box key={idx} className={`message ${msg.role}`}>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({ node, ...props }) => <Typography component="p" sx={{ color: 'inherit', mb: 1.5 }} {...props} />,
+                    li: ({ node, ...props }) => <li style={{ marginBottom: '0.5em', marginLeft: '1.2em' }} {...props} />,
+                    ol: ({ node, ...props }) => <ol style={{ marginBottom: '0.5em' }} {...props} />,
+                    ul: ({ node, ...props }) => <ul style={{ marginBottom: '0.5em' }} {...props} />,
+                    a: ({ node, ...props }) => <a style={{ color: '#8be9fd' }} target="_blank" rel="noopener noreferrer" {...props} />,
+                    h1: ({node, ...props}) => <Typography variant="h6" component="h3" sx={{mt:2, mb:1, color: '#8be9fd'}} {...props} />,
+                    h2: ({node, ...props}) => <Typography variant="subtitle1" component="h4" sx={{mt:1.5, mb:0.5, color: '#8be9fd'}} {...props} />,
+                  }}
+                >
+                  {msg.content}
+                </ReactMarkdown>
+              </Box>
+            ))}
+            {isLoading && (
+              <Box className="message assistant loading">
+                <div className="dot-flashing"></div>
+                <div className="dot-flashing dot-flashing-delay1"></div>
+                <div className="dot-flashing dot-flashing-delay2"></div>
+              </Box>
+            )}
+          </Box>
 
-        {/* Chat Input Box */}
-        <div style={{
-          width: "100%", padding: "20px", borderRadius: 8, backgroundColor: "rgb(17,27,39)",
-          display: "flex", margin: "auto"
-        }}>
-          <input
-            ref={inputRef}
-            type="text"
-            onKeyDown={handleKeyPress}
-            disabled={isLoading}
-            style={{
-              width: "100%", backgroundColor: "transparent", padding: "10px",
-              border: "none", outline: "none", color: "white", fontSize: "20px",
-            }}
-          />
-          <IconButton onClick={handleSubmit} disabled={isLoading} sx={{ ml: "auto", color: "white" }}>
-            <IoMdSend />
-          </IconButton>
-        </div>
+          {error && (
+            <Typography className="chat-error-message">
+              {error}
+            </Typography>
+          )}
+
+          {/* Input box */}
+          <Box component="form" onSubmit={handleSend} className="chat-input-form">
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyPress}
+              disabled={isLoading}
+              placeholder="Type your message..."
+              className="chat-input"
+            />
+            <IconButton type="submit" disabled={isLoading || !input.trim()} className="chat-send-button">
+              {isLoading ? <CircularProgress size={24} color="inherit" /> : <IoMdSend />}
+            </IconButton>
+          </Box>
+        </Box>
       </Box>
     </Box>
   );

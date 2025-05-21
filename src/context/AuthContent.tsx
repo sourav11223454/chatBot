@@ -1,9 +1,9 @@
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { checkAuthStatus, loginUser } from "../helpers/api-communicator";
-import axios from "axios";
+import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { checkAuthStatus, loginUser, signupUser, logoutUser } from "../helpers/api-communicator"; // Ensure logoutUser is imported
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
-// Type definitions
+// Type definitions - No changes needed here, still good
 type User = {
   name: string;
   email: string;
@@ -32,17 +32,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const checkStatus = async () => {
       try {
+        // This request will automatically send the cookie due to withCredentials: true
         const data = await checkAuthStatus();
-        if (data) {
+        if (data && data.status) { // Assuming checkAuthStatus returns { status: true, name, email } if token is valid
           setUser({ email: data.email, name: data.name });
           setIsLoggedIn(true);
+          toast.success("Successfully authenticated!", { id: "authStatus" });
         } else {
           setUser(null);
           setIsLoggedIn(false);
+          toast.error("Authentication failed or token expired.", { id: "authStatus" });
         }
-      } catch {
+      } catch (err) {
+        console.error("Authentication status check failed:", err);
         setUser(null);
         setIsLoggedIn(false);
+        toast.error("Failed to verify authentication status.", { id: "authStatus" });
       } finally {
         setLoading(false);
       }
@@ -52,39 +57,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Login handler
   const login = async (email: string, password: string) => {
-    const data = await loginUser(email, password);
-    if (data) {
-      setUser({ email: data.email, name: data.name });
-      setIsLoggedIn(true);
-      navigate("/chat"); // Redirect after login
+    try {
+      // This call will set the cookie on the backend
+      const data = await loginUser(email, password);
+      if (data) {
+        setUser({ email: data.email, name: data.name });
+        setIsLoggedIn(true);
+        navigate("/chat");
+        toast.success("Logged in successfully!", { id: "login" });
+      }
+    } catch (err: any) {
+      console.error("Login failed:", err);
+      toast.error(err.response?.data?.message || "Login failed. Please check your credentials.", { id: "login" });
+      throw err;
     }
   };
 
   // Signup handler
   const signup = async (name: string, email: string, password: string) => {
-    const res = await axios.post(
-      "http://localhost:5000/api/v1/user/signup",
-      { name, email, password },
-      { withCredentials: true }
-    );
-    const data = res.data;
-    if (data) {
-      setUser({ email: data.email, name: data.name });
-      setIsLoggedIn(true);
-      navigate("/chat"); // Redirect after signup
+    try {
+      // This call will set the cookie on the backend
+      const data = await signupUser(name, email, password);
+      if (data) {
+        setUser({ email: data.email, name: data.name });
+        setIsLoggedIn(true);
+        navigate("/chat");
+        toast.success("Signed up successfully!", { id: "signup" });
+      }
+    } catch (err: any) {
+      console.error("Signup failed:", err);
+      toast.error(err.response?.data?.message || "Signup failed. Please try again.", { id: "signup" });
+      throw err;
     }
   };
 
   // Logout handler
   const logout = async () => {
     try {
-      // Send request to backend logout route
-      await axios.post("http://localhost:5000/api/v1/user/logout", {}, { withCredentials: true });
+      // This call will clear the cookie on the backend
+      await logoutUser();
       setUser(null);
       setIsLoggedIn(false);
-      navigate("/"); // Redirect to home or login page
+      navigate("/");
+      toast.success("Logged out successfully!", { id: "logout" });
     } catch (err) {
       console.error("Error logging out:", err);
+      toast.error("Logout failed.", { id: "logout" });
     }
   };
 
